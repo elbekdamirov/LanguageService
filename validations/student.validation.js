@@ -30,7 +30,21 @@ exports.studentValidation = (body) => {
       "any.required": "Birth date is required",
     }),
 
-    is_active: Joi.boolean().default(false),
+    password: Joi.string().min(6).max(30).required().messages({
+      "string.empty": "Password is required",
+      "string.min": "Password should be at least 6 characters",
+      "string.max": "Password should not exceed 30 characters",
+      "any.required": "Password is required",
+    }),
+
+    confirm_password: Joi.string()
+      .valid(Joi.ref("password"))
+      .required()
+      .messages({
+        "any.only": "Passwords didn't match",
+        "string.empty": "Confirm password is required",
+        "any.required": "Confirm password is required",
+      }),
   });
 
   return schema.validate(body, { abortEarly: false });
@@ -60,8 +74,6 @@ exports.updateStudentValidation = (body) => {
       "date.base": "Birth date must be a valid date",
       "date.format": "Birth date must be in YYYY-MM-DD format",
     }),
-
-    is_active: Joi.boolean(),
   }).min(1);
 
   return schema.validate(body, { abortEarly: false });

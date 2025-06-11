@@ -40,6 +40,9 @@ const Student = sequelize.define(
     hashed_token: {
       type: DataTypes.STRING,
     },
+    activation_link: {
+      type: DataTypes.STRING,
+    },
   },
   {
     freezeTableName: true,

@@ -4,14 +4,26 @@ const {
   findOne,
   remove,
   update,
+  activate,
+  changePassword,
+  login,
+  logout,
+  refresh,
 } = require("../controllers/student.controller");
+const studentJwtGuard = require("../middleware/guards/student-jwt.guard");
+const studentSelfGuard = require("../middleware/guards/student-self.guard");
 
 const router = require("express").Router();
 
-router.post("/", create);
-router.get("/", findAll);
-router.get("/:id", findOne);
-router.patch("/:id", update);
-router.delete("/:id", remove);
+router.get("/", studentJwtGuard, findAll);
+router.post("/register", create);
+router.post("/login", login);
+router.post("/logout", logout);
+router.post("/refresh", refresh);
+router.patch("/change-password", studentJwtGuard, changePassword);
+router.get("/activate/:link", activate);
+router.get("/:id", studentJwtGuard, studentSelfGuard, findOne);
+router.patch("/:id", studentJwtGuard, studentSelfGuard, update);
+router.delete("/:id", studentJwtGuard, studentSelfGuard, remove);
 
 module.exports = router;

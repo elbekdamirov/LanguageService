@@ -6,7 +6,7 @@ class JwtService {
     this.accessKey = accessKey;
     this.refreshKey = refreshKey;
     this.accessTime = accessTime;
-    this.refreshKey = refreshTime;
+    this.refreshTime = refreshTime;
   }
 
   generateTokens(payload) {

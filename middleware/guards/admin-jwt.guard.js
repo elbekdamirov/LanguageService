@@ -31,6 +31,6 @@ module.exports = async (req, res, next) => {
 
     next();
   } catch (error) {
-    sendErrorResponse(error, res);
+    sendErrorResponse(error, res, 400);
   }
 };

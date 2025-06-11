@@ -41,17 +41,17 @@ let StudentJwtService = new JwtService(
 );
 
 let OwnerJwtService = new JwtService(
-  config.get("studentAccessKey"),
-  config.get("studentRefreshKey"),
-  config.get("studentAccessTime"),
-  config.get("studentRefreshTime")
+  config.get("ownerAccessKey"),
+  config.get("ownerRefreshKey"),
+  config.get("ownerAccessTime"),
+  config.get("ownerRefreshTime")
 );
 
 let AdminJwtService = new JwtService(
-  config.get("studentAccessKey"),
-  config.get("studentRefreshKey"),
-  config.get("studentAccessTime"),
-  config.get("studentRefreshTime")
+  config.get("adminAccessKey"),
+  config.get("adminRefreshKey"),
+  config.get("adminAccessTime"),
+  config.get("adminRefreshTime")
 );
 
 module.exports = {

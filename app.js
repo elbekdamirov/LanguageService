@@ -12,8 +12,10 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use("/api", indexRouter);
-
 app.use(errorHandlingMiddleware);
+app.use((req, res) => {
+  res.status(404).send({ message: "404 NOT FOUND" });
+});
 
 async function start() {
   try {

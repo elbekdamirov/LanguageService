@@ -24,10 +24,21 @@ exports.adminValidation = (body) => {
 
     is_active: Joi.boolean().default(false),
 
-    password: Joi.string().required().messages({
+    password: Joi.string().min(6).max(30).required().messages({
       "string.empty": "Password is required",
+      "string.min": "Password should be at least 6 characters",
+      "string.max": "Password should not exceed 30 characters",
       "any.required": "Password is required",
     }),
+
+    confirm_password: Joi.string()
+      .valid(Joi.ref("password"))
+      .required()
+      .messages({
+        "any.only": "Passwords didn't match",
+        "string.empty": "Confirm password is required",
+        "any.required": "Confirm password is required",
+      }),
   });
 
   return schema.validate(body, { abortEarly: false });
@@ -55,9 +66,8 @@ exports.updateAdminValidation = (body) => {
 
     is_active: Joi.boolean(),
 
-    password: Joi.string().messages({
-      "string.empty": "Password cannot be empty",
-    }),
+    password: Joi.forbidden(),
+    confirm_password: Joi.forbidden(),
   }).min(1);
 
   return schema.validate(body, { abortEarly: false });

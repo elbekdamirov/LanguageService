@@ -74,6 +74,9 @@ exports.updateStudentValidation = (body) => {
       "date.base": "Birth date must be a valid date",
       "date.format": "Birth date must be in YYYY-MM-DD format",
     }),
+
+    password: Joi.forbidden(),
+    confirm_password: Joi.forbidden(),
   }).min(1);
 
   return schema.validate(body, { abortEarly: false });

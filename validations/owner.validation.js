@@ -10,9 +10,12 @@ exports.ownerValidation = (body) => {
 
     phone: Joi.string()
       .pattern(/^\d{2}-\d{3}-\d{2}-\d{2}$/)
+      .required()
       .messages({
         "string.pattern.base":
           "Phone number must match the format: 00-000-00-00",
+        "string.empty": "Phone number is required",
+        "any.required": "Phone number is required",
       }),
 
     email: Joi.string().email().max(50).required().messages({
@@ -26,10 +29,20 @@ exports.ownerValidation = (body) => {
       "boolean.base": "is_active must be true or false",
     }),
 
-    password: Joi.string().required().messages({
+    password: Joi.string().min(6).required().messages({
       "string.empty": "Password is required",
       "any.required": "Password is required",
+      "string.min": "Password must be at least 6 characters",
     }),
+
+    confirm_password: Joi.string()
+      .required()
+      .valid(Joi.ref("password"))
+      .messages({
+        "any.only": "Passwords do not match",
+        "string.empty": "Confirm password is required",
+        "any.required": "Confirm password is required",
+      }),
   });
 
   return schema.validate(body, { abortEarly: false });
@@ -57,10 +70,9 @@ exports.updateOwnerValidation = (body) => {
     is_active: Joi.boolean().messages({
       "boolean.base": "is_active must be true or false",
     }),
-    
-    password: Joi.string().messages({
-      "string.empty": "Password cannot be empty",
-    }),
+
+    password: Joi.forbidden(),
+    confirm_password: Joi.forbidden(),
   }).min(1);
 
   return schema.validate(body, { abortEarly: false });

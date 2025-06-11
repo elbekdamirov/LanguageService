@@ -1,28 +1,27 @@
 const { sendErrorResponse } = require("../helpers/send_error_response");
-const Student = require("../models/student.model");
+const Owner = require("../models/owner.model");
 const uuid = require("uuid");
 const bcrypt = require("bcrypt");
 const config = require("config");
 const {
-  studentValidation,
-  updateStudentValidation,
-} = require("../validations/student.validation");
-const { StudentJwtService } = require("../services/jwt.service");
-const { studentMailService } = require("../services/mail.service");
+  ownerValidation,
+  updateOwnerValidation,
+} = require("../validations/owner.validation");
+const { OwnerJwtService } = require("../services/jwt.service");
+const { ownerMailService } = require("../services/mail.service");
 const { Op } = require("sequelize");
 
 const create = async (req, res) => {
   try {
-    const { error, value } = studentValidation(req.body);
+    const { error, value } = ownerValidation(req.body);
 
     if (error) {
       return sendErrorResponse(error, res, 400);
     }
 
-    const { full_name, phone, email, birth_date, password, confirm_password } =
-      value;
+    const { full_name, phone, email, password, confirm_password } = value;
 
-    const candidate = await Student.findOne({ where: { email } });
+    const candidate = await Owner.findOne({ where: { email } });
     if (candidate) {
       return sendErrorResponse(
         { message: "This user already exists" },
@@ -38,15 +37,14 @@ const create = async (req, res) => {
     const activation_link = uuid.v4();
     const link = `${config.get(
       "api_url"
-    )}/api/students/activate/${activation_link}`;
+    )}/api/owners/activate/${activation_link}`;
 
-    await studentMailService.sendMail(email, link);
+    await ownerMailService.sendMail(email, link);
 
-    const newData = await Student.create({
+    const newData = await Owner.create({
       full_name,
       phone,
       email,
-      birth_date,
       hashed_password,
       is_active: false,
       activation_link,
@@ -56,21 +54,21 @@ const create = async (req, res) => {
       id: newData.id,
       email: newData.email,
       is_active: newData.is_active,
-      role: "student",
+      role: "owner",
     };
 
-    const tokens = StudentJwtService.generateTokens(payload);
+    const tokens = OwnerJwtService.generateTokens(payload);
     newData.hashed_token = await bcrypt.hash(tokens.refreshToken, 7);
     await newData.save();
 
     res.cookie("refreshToken", tokens.refreshToken, {
       httpOnly: true,
-      maxAge: config.get("studentCookieRefreshTime"),
+      maxAge: config.get("ownerCookieRefreshTime"),
     });
 
     res.status(201).send({
-      message: "New Student Added. Check your email",
-      student: { id: newData.id, full_name, email },
+      message: "New Owner Added. Check your email",
+      owner: { id: newData.id, full_name, email },
       accessToken: tokens.accessToken,
     });
   } catch (error) {
@@ -82,12 +80,12 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const student = await Student.findOne({ where: { email } });
-    if (!student) {
+    const owner = await Owner.findOne({ where: { email } });
+    if (!owner) {
       return sendErrorResponse({ message: "User not found" }, res, 404);
     }
 
-    if (!student.is_active) {
+    if (!owner.is_active) {
       return sendErrorResponse(
         { message: "Account is not activated" },
         res,
@@ -95,30 +93,30 @@ const login = async (req, res) => {
       );
     }
 
-    const isMatch = await bcrypt.compare(password, student.hashed_password);
+    const isMatch = await bcrypt.compare(password, owner.hashed_password);
     if (!isMatch) {
       return sendErrorResponse({ message: "Incorrect password" }, res, 400);
     }
 
     const payload = {
-      id: student.id,
-      email: student.email,
-      is_active: student.is_active,
-      role: "student",
+      id: owner.id,
+      email: owner.email,
+      is_active: owner.is_active,
+      role: "owner",
     };
 
-    const tokens = StudentJwtService.generateTokens(payload);
-    student.hashed_token = await bcrypt.hash(tokens.refreshToken, 7);
-    await student.save();
+    const tokens = OwnerJwtService.generateTokens(payload);
+    owner.hashed_token = await bcrypt.hash(tokens.refreshToken, 7);
+    await owner.save();
 
     res.cookie("refreshToken", tokens.refreshToken, {
       httpOnly: true,
-      maxAge: config.get("studentCookieRefreshTime"),
+      maxAge: config.get("ownerCookieRefreshTime"),
     });
 
     res.send({
       message: "Login successful",
-      student: { id: student.id, full_name: student.full_name, email },
+      owner: { id: owner.id, full_name: owner.full_name, email },
       accessToken: tokens.accessToken,
     });
   } catch (error) {
@@ -136,26 +134,26 @@ const logout = async (req, res) => {
         .send({ message: "Refresh token not found in cookie" });
     }
 
-    const students = await Student.findAll({
+    const owners = await Owner.findAll({
       where: { hashed_token: { [Op.ne]: null } },
     });
 
-    let matchedStudent = null;
+    let matchedOwner = null;
 
-    for (const student of students) {
-      const isMatch = await bcrypt.compare(refreshToken, student.hashed_token);
+    for (const owner of owners) {
+      const isMatch = await bcrypt.compare(refreshToken, owner.hashed_token);
       if (isMatch) {
-        matchedStudent = student;
+        matchedOwner = owner;
         break;
       }
     }
 
-    if (!matchedStudent) {
+    if (!matchedOwner) {
       return res.status(400).send({ message: "Invalid refresh token" });
     }
 
-    matchedStudent.hashed_token = null;
-    await matchedStudent.save();
+    matchedOwner.hashed_token = null;
+    await matchedOwner.save();
 
     res.clearCookie("refreshToken");
 
@@ -167,7 +165,7 @@ const logout = async (req, res) => {
 
 const findAll = async (req, res) => {
   try {
-    const data = await Student.findAll();
+    const data = await Owner.findAll();
     res.status(200).send(data);
   } catch (error) {
     sendErrorResponse(error, res, 400);
@@ -176,9 +174,9 @@ const findAll = async (req, res) => {
 
 const findOne = async (req, res) => {
   try {
-    const data = await Student.findByPk(req.params.id);
+    const data = await Owner.findByPk(req.params.id);
     if (!data) {
-      return sendErrorResponse({ message: "Student not found" }, res, 404);
+      return sendErrorResponse({ message: "Owner not found" }, res, 404);
     }
     res.status(200).send(data);
   } catch (error) {
@@ -188,18 +186,18 @@ const findOne = async (req, res) => {
 
 const update = async (req, res) => {
   try {
-    const { error, value } = updateStudentValidation(req.body);
+    const { error, value } = updateOwnerValidation(req.body);
     if (error) {
       return sendErrorResponse(error, res, 400);
     }
 
-    const student = await Student.findByPk(req.params.id);
-    if (!student) {
-      return res.status(404).send({ message: "Student not found" });
+    const owner = await Owner.findByPk(req.params.id);
+    if (!owner) {
+      return res.status(404).send({ message: "Owner not found" });
     }
 
-    await student.update(value);
-    res.send({ message: "Student updated", student });
+    await owner.update(value);
+    res.send({ message: "Owner updated", owner });
   } catch (error) {
     sendErrorResponse(error, res, 400);
   }
@@ -207,13 +205,13 @@ const update = async (req, res) => {
 
 const remove = async (req, res) => {
   try {
-    const data = await Student.findByPk(req.params.id);
+    const data = await Owner.findByPk(req.params.id);
     if (!data) {
-      return sendErrorResponse({ message: "Student not found" }, res, 404);
+      return sendErrorResponse({ message: "Owner not found" }, res, 404);
     }
 
     await data.destroy();
-    res.status(200).send({ message: "Student deleted" });
+    res.status(200).send({ message: "Owner deleted" });
   } catch (error) {
     sendErrorResponse(error, res, 400);
   }
@@ -223,7 +221,7 @@ const activate = async (req, res) => {
   try {
     const { link } = req.params;
 
-    const user = await Student.findOne({ where: { activation_link: link } });
+    const user = await Owner.findOne({ where: { activation_link: link } });
 
     if (!user) {
       return res.status(400).send({ message: "Activation link is invalid" });
@@ -245,25 +243,25 @@ const activate = async (req, res) => {
 
 const changePassword = async (req, res) => {
   try {
-    const studentId = req.student.id;
+    const ownerId = req.owner.id;
     const { old_password, new_password, confirm_password } = req.body;
 
     if (new_password !== confirm_password) {
       return res.status(400).send({ message: "Passwords do not match" });
     }
 
-    const student = await Student.findByPk(studentId);
-    if (!student) {
-      return res.status(404).send({ message: "Student not found" });
+    const owner = await Owner.findByPk(ownerId);
+    if (!owner) {
+      return res.status(404).send({ message: "Owner not found" });
     }
 
-    const isMatch = await bcrypt.compare(old_password, student.hashed_password);
+    const isMatch = await bcrypt.compare(old_password, owner.hashed_password);
     if (!isMatch) {
       return res.status(401).send({ message: "Old password is incorrect" });
     }
 
-    student.hashed_password = await bcrypt.hash(new_password, 7);
-    await student.save();
+    owner.hashed_password = await bcrypt.hash(new_password, 7);
+    await owner.save();
 
     res.status(200).send({ message: "Password successfully changed" });
   } catch (error) {
@@ -279,37 +277,37 @@ const refresh = async (req, res) => {
       return res.status(401).send({ message: "Refresh token not found" });
     }
 
-    const decodedPayload = await StudentJwtService.verifyRefreshToken(
+    const decodedPayload = await OwnerJwtService.verifyRefreshToken(
       refreshToken
     );
     if (!decodedPayload) {
       return res.status(403).send({ message: "Invalid refresh token" });
     }
 
-    const student = await Student.findByPk(decodedPayload.id);
-    if (!student || !student.hashed_token) {
+    const owner = await Owner.findByPk(decodedPayload.id);
+    if (!owner || !owner.hashed_token) {
       return res.status(403).send({ message: "Access denied" });
     }
 
-    const isMatch = await bcrypt.compare(refreshToken, student.hashed_token);
+    const isMatch = await bcrypt.compare(refreshToken, owner.hashed_token);
     if (!isMatch) {
       return res.status(403).send({ message: "Refresh token doesn't match" });
     }
 
     const payload = {
-      id: student.id,
-      email: student.email,
-      is_active: student.is_active,
-      role: "student",
+      id: owner.id,
+      email: owner.email,
+      is_active: owner.is_active,
+      role: "owner",
     };
-    const tokens = StudentJwtService.generateTokens(payload);
+    const tokens = OwnerJwtService.generateTokens(payload);
 
-    student.hashed_token = await bcrypt.hash(tokens.refreshToken, 7);
-    await student.save();
+    owner.hashed_token = await bcrypt.hash(tokens.refreshToken, 7);
+    await owner.save();
 
     res.cookie("refreshToken", tokens.refreshToken, {
       httpOnly: true,
-      maxAge: config.get("studentCookieRefreshTime"),
+      maxAge: config.get("ownerCookieRefreshTime"),
     });
 
     res.send({

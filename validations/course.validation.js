@@ -60,8 +60,10 @@ exports.updateCourseValidation = (body) => {
       "number.precision": "Price can have maximum 2 decimal places",
     }),
 
-    ownerId: Joi.forbidden().messages({
-      "any.unknown": "Cannot change owner ID",
+    ownerId: Joi.number().integer().positive().messages({
+      "number.base": "Owner ID must be a number",
+      "number.integer": "Owner ID must be an integer",
+      "number.positive": "Owner ID must be positive",
     }),
   }).min(1);
 

@@ -35,8 +35,10 @@ exports.updateHomeworkValidation = (body) => {
       "string.empty": "Description cannot be empty",
     }),
 
-    studentLessonId: Joi.forbidden().messages({
-      "any.unknown": "Cannot change studentLessonId",
+    studentLessonId: Joi.number().integer().positive().messages({
+      "number.base": "StudentLesson ID must be a number",
+      "number.integer": "StudentLesson ID must be an integer",
+      "number.positive": "StudentLesson ID must be positive",
     }),
   }).min(1);
 

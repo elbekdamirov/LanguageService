@@ -42,12 +42,16 @@ exports.updateStudentHomeworkValidation = (body) => {
       "any.only": "Status must be one of: submitted, not_submitted, or late",
     }),
 
-    homeworkId: Joi.forbidden().messages({
-      "any.unknown": "Cannot change homework ID",
+    homeworkId: Joi.number().integer().positive().messages({
+      "number.base": "Homework ID must be a number",
+      "number.integer": "Homework ID must be an integer",
+      "number.positive": "Homework ID must be positive",
     }),
 
-    studentId: Joi.forbidden().messages({
-      "any.unknown": "Cannot change student ID",
+    studentId: Joi.number().integer().positive().messages({
+      "number.base": "Student ID must be a number",
+      "number.integer": "Student ID must be an integer",
+      "number.positive": "Student ID must be positive",
     }),
   }).min(1);
 

@@ -42,12 +42,16 @@ exports.updateCourseReviewValidation = (body) => {
       "string.empty": "Review message cannot be empty",
     }),
 
-    courseId: Joi.forbidden().messages({
-      "any.unknown": "Cannot change course ID",
+    courseId: Joi.number().integer().positive().messages({
+      "number.base": "Course ID must be a number",
+      "number.integer": "Course ID must be an integer",
+      "number.positive": "Course ID must be positive",
     }),
 
-    studentId: Joi.forbidden().messages({
-      "any.unknown": "Cannot change student ID",
+    studentId: Joi.number().integer().positive().messages({
+      "number.base": "Student ID must be a number",
+      "number.integer": "Student ID must be an integer",
+      "number.positive": "Student ID must be positive",
     }),
   }).min(1);
 

@@ -53,12 +53,16 @@ exports.updatePaymentValidation = (body) => {
       "date.base": "Date must be a valid date",
     }),
 
-    contractId: Joi.forbidden().messages({
-      "any.unknown": "Cannot change contract ID",
+    contractId: Joi.number().integer().positive().messages({
+      "number.base": "Contract ID must be a number",
+      "number.integer": "Contract ID must be an integer",
+      "number.positive": "Contract ID must be positive",
     }),
 
-    studentId: Joi.forbidden().messages({
-      "any.unknown": "Cannot change student ID",
+    studentId: Joi.number().integer().positive().messages({
+      "number.base": "Student ID must be a number",
+      "number.integer": "Student ID must be an integer",
+      "number.positive": "Student ID must be positive",
     }),
   }).min(1);
 

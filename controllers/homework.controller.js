@@ -1,5 +1,6 @@
 const { sendErrorResponse } = require("../helpers/send_error_response");
 const Homework = require("../models/homework.model");
+const StudentLesson = require("../models/student_lesson.model");
 const {
   homeworkValidation,
   updateHomeworkValidation,
@@ -28,7 +29,12 @@ const create = async (req, res) => {
 
 const findAll = async (req, res) => {
   try {
-    const homeworkList = await Homework.findAll();
+    const homeworkList = await Homework.findAll({
+      include: {
+        model: StudentLesson,
+        attributes: ["id", "createdAt", "studentId", "contractId"],
+      },
+    });
     res.status(200).send({ data: homeworkList });
   } catch (error) {
     sendErrorResponse(error, res, 400);

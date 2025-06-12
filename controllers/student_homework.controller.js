@@ -1,4 +1,6 @@
 const { sendErrorResponse } = require("../helpers/send_error_response");
+const Homework = require("../models/homework.model");
+const Student = require("../models/student.model");
 const StudentHomework = require("../models/student_homework.model");
 const {
   studentHomeworkValidation,
@@ -31,7 +33,18 @@ const create = async (req, res) => {
 
 const findAll = async (req, res) => {
   try {
-    const studentHomeworks = await StudentHomework.findAll();
+    const studentHomeworks = await StudentHomework.findAll({
+      include: [
+        {
+          model: Homework,
+          attributes: ["title", "description"],
+        },
+        {
+          model: Student,
+          attributes: ["full_name"],
+        },
+      ],
+    });
     res.status(200).send({ data: studentHomeworks });
   } catch (error) {
     sendErrorResponse(error, res, 400);
@@ -41,7 +54,18 @@ const findAll = async (req, res) => {
 const findOne = async (req, res) => {
   try {
     const { id } = req.params;
-    const studentHomework = await StudentHomework.findByPk(id);
+    const studentHomework = await StudentHomework.findByPk(id, {
+      include: [
+        {
+          model: Homework,
+          attributes: ["title", "description"],
+        },
+        {
+          model: Student,
+          attributes: ["full_name"],
+        },
+      ],
+    });
 
     if (!studentHomework) {
       return res.status(404).send({ error: "StudentHomework not found" });

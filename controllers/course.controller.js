@@ -4,6 +4,7 @@ const {
   updateCourseValidation,
 } = require("../validations/course.validation");
 const { sendErrorResponse } = require("../helpers/send_error_response");
+const Owner = require("../models/owner.model");
 
 const create = async (req, res) => {
   try {
@@ -30,7 +31,12 @@ const create = async (req, res) => {
 
 const findAll = async (req, res) => {
   try {
-    const courses = await Course.findAll();
+    const courses = await Course.findAll({
+      include: {
+        model: Owner,
+        attributes: ["full_name", "email"],
+      },
+    });
     res.status(200).send(courses);
   } catch (error) {
     sendErrorResponse(error, res, 400);
@@ -58,7 +64,12 @@ const update = async (req, res) => {
       return sendErrorResponse(error, res, 400);
     }
 
-    const course = await Course.findByPk(req.params.id);
+    const course = await Course.findByPk(req.params.id, {
+      include: {
+        model: Owner,
+        attributes: ["full_name", "email"],
+      },
+    });
     if (!course) {
       return res.status(404).send({ error: "Course not found" });
     }

@@ -12,7 +12,7 @@ const router = require("express").Router();
 
 router.post("/", ownerJwtGuard, create);
 router.get("/", findAll);
-router.get("/:id", findOne);
+router.get("/:id", ownerJwtGuard, ownerSelfGuard, findOne);
 router.patch("/:id", ownerJwtGuard, ownerSelfGuard, update);
 router.delete("/:id", ownerJwtGuard, ownerSelfGuard, remove);
 

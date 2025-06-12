@@ -4,6 +4,8 @@ const {
   updateStudentLessonValidation,
 } = require("../validations/student_lesson.validation");
 const { sendErrorResponse } = require("../helpers/send_error_response");
+const Contract = require("../models/contract.model");
+const Student = require("../models/student.model");
 
 const create = async (req, res) => {
   try {
@@ -29,7 +31,18 @@ const create = async (req, res) => {
 
 const findAll = async (req, res) => {
   try {
-    const lessons = await StudentLesson.findAll();
+    const lessons = await StudentLesson.findAll({
+      include: [
+        {
+          model: Contract,
+          attributes: ["start_time", "end_time"],
+        },
+        {
+          model: Student,
+          attributes: ["full_name", "email"],
+        },
+      ],
+    });
     res.status(200).send(lessons);
   } catch (error) {
     sendErrorResponse(error, res, 400);
@@ -38,7 +51,18 @@ const findAll = async (req, res) => {
 
 const findOne = async (req, res) => {
   try {
-    const lesson = await StudentLesson.findByPk(req.params.id);
+    const lesson = await StudentLesson.findByPk(req.params.id, {
+      include: [
+        {
+          model: Contract,
+          attributes: ["start_time", "end_time"],
+        },
+        {
+          model: Student,
+          attributes: ["full_name", "email"],
+        },
+      ],
+    });
 
     if (!lesson) {
       return res.status(404).send({ error: "Student lesson not found" });

@@ -12,8 +12,8 @@ const router = require("express").Router();
 
 router.post("/", ownerJwtGuard, create);
 router.get("/", ownerJwtGuard, findAll);
-router.get("/:id", ownerJwtGuard, ownerSelfGuard, findOne);
-router.patch("/:id", ownerJwtGuard, ownerSelfGuard, update);
-router.delete("/:id", ownerJwtGuard, ownerSelfGuard, remove);
+router.get("/:id", ownerJwtGuard, findOne);
+router.patch("/:id", ownerJwtGuard, update);
+router.delete("/:id", ownerJwtGuard, remove);
 
 module.exports = router;

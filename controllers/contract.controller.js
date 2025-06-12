@@ -47,11 +47,11 @@ const findAll = async (req, res) => {
       include: [
         {
           model: Course,
-          attributes: ["id", "name"],
+          attributes: ["name"],
         },
         {
           model: Student,
-          attributes: ["id", "fullName"],
+          attributes: ["full_name"],
         },
       ],
     });
@@ -67,11 +67,11 @@ const findOne = async (req, res) => {
       include: [
         {
           model: Course,
-          attributes: ["id", "name"],
+          attributes: ["name"],
         },
         {
           model: Student,
-          attributes: ["id", "fullName"],
+          attributes: ["full_name"],
         },
       ],
     });

@@ -10,10 +10,10 @@ const studentSelfGuard = require("../middleware/guards/student-self.guard");
 
 const router = require("express").Router();
 
-router.post("/", studentJwtGuard, studentSelfGuard, create);
+router.post("/", studentJwtGuard, create);
 router.get("/", studentJwtGuard, findAll);
-router.get("/:id", studentJwtGuard, studentSelfGuard, findOne);
-router.patch("/:id", studentJwtGuard, studentSelfGuard, update);
-router.delete("/:id", studentJwtGuard, studentSelfGuard, remove);
+router.get("/:id", studentJwtGuard, findOne);
+router.patch("/:id", studentJwtGuard, update);
+router.delete("/:id", studentJwtGuard, remove);
 
 module.exports = router;

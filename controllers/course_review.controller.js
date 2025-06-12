@@ -4,6 +4,8 @@ const {
   updateCourseReviewValidation,
 } = require("../validations/course_review.validation");
 const { sendErrorResponse } = require("../helpers/send_error_response");
+const Course = require("../models/course.model");
+const Student = require("../models/student.model");
 
 const create = async (req, res) => {
   try {
@@ -27,7 +29,18 @@ const create = async (req, res) => {
 
 const findAll = async (req, res) => {
   try {
-    const reviews = await CourseReview.findAll();
+    const reviews = await CourseReview.findAll({
+      include: [
+        {
+          model: Student,
+          attributes: ["full_name"],
+        },
+        {
+          model: Course,
+          attributes: ["name"],
+        },
+      ],
+    });
     res.status(200).send(reviews);
   } catch (error) {
     sendErrorResponse(error, res, 400);
@@ -36,7 +49,18 @@ const findAll = async (req, res) => {
 
 const findOne = async (req, res) => {
   try {
-    const review = await CourseReview.findByPk(req.params.id);
+    const review = await CourseReview.findByPk(req.params.id, {
+      include: [
+        {
+          model: Student,
+          attributes: ["full_name"],
+        },
+        {
+          model: Course,
+          attributes: ["name"],
+        },
+      ],
+    });
 
     if (!review) {
       return res.status(404).send({ error: "Course review not found" });

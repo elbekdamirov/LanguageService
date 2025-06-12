@@ -1,5 +1,9 @@
 const { sendErrorResponse } = require("../helpers/send_error_response");
+const Contract = require("../models/contract.model");
+const Course = require("../models/course.model");
+const Owner = require("../models/owner.model");
 const Payment = require("../models/payment.model");
+const Student = require("../models/student.model");
 const {
   paymentValidation,
   updatePaymentValidation,
@@ -98,10 +102,52 @@ const remove = async (req, res) => {
   }
 };
 
+const findPaymentsByStudent = async (req, res) => {
+  try {
+    const { studentId } = req.body;
+
+    if (!studentId) {
+      return res.status(400).send({ error: "studentId is required" });
+    }
+
+    const payments = await Payment.findAll({
+      where: { studentId },
+      include: [
+        {
+          model: Student,
+          attributes: ["full_name", "email"],
+        },
+        {
+          model: Contract,
+          include: [
+            {
+              model: Course,
+              include: [
+                {
+                  model: Owner,
+                  attributes: ["full_name", "email"],
+                },
+              ],
+              attributes: ["name"],
+            },
+          ],
+          attributes: ["name", "status"],
+        },
+      ],
+      attributes: ["amount", "date", "method", "createdAt"],
+    });
+
+    res.status(200).send(payments);
+  } catch (error) {
+    sendErrorResponse(error, res, 400);
+  }
+};
+
 module.exports = {
   create,
   findAll,
   findOne,
   update,
   remove,
+  findPaymentsByStudent,
 };

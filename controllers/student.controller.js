@@ -10,6 +10,7 @@ const {
 const { StudentJwtService } = require("../services/jwt.service");
 const { studentMailService } = require("../services/mail.service");
 const { Op } = require("sequelize");
+const Contract = require("../models/contract.model");
 
 const create = async (req, res) => {
   try {
@@ -321,6 +322,69 @@ const refresh = async (req, res) => {
   }
 };
 
+const findByDate = async (req, res) => {
+  try {
+    const { start_date, end_date } = req.body;
+
+    if (!start_date || !end_date) {
+      return sendErrorResponse(
+        {
+          message: "start_date and end_date are required",
+        },
+        res,
+        400
+      );
+    }
+
+    const students = await Student.findAll({
+      include: [
+        {
+          model: Contract,
+          attributes: ["name", "status"],
+        },
+      ],
+      attributes: ["full_name", "email", "is_active"],
+    });
+
+    res.status(200).send(students);
+  } catch (error) {
+    sendErrorResponse(error, res, 400);
+  }
+};
+
+const findCancelled = async (req, res) => {
+  try {
+    const { start_date, end_date } = req.body;
+
+    if (!start_date || !end_date) {
+      return sendErrorResponse(
+        {
+          message: "start_date and end_date are required",
+        },
+        res,
+        400
+      );
+    }
+
+    const students = await Student.findAll({
+      include: [
+        {
+          model: Contract,
+          where: {
+            status: "CANCELLED",
+          },
+          attributes: ["name", "status"],
+        },
+      ],
+      attributes: ["full_name", "email", "is_active"],
+    });
+
+    res.status(200).send(students);
+  } catch (error) {
+    sendErrorResponse(error, res, 400);
+  }
+};
+
 module.exports = {
   create,
   login,
@@ -332,4 +396,6 @@ module.exports = {
   activate,
   changePassword,
   refresh,
+  findByDate,
+  findCancelled,
 };

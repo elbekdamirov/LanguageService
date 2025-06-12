@@ -4,6 +4,9 @@ const {
   updateContractValidation,
 } = require("../validations/contract.validation");
 const { sendErrorResponse } = require("../helpers/send_error_response");
+const Course = require("../models/course.model");
+const Student = require("../models/student.model");
+const { Op } = require("sequelize");
 
 const create = async (req, res) => {
   try {
@@ -40,7 +43,18 @@ const create = async (req, res) => {
 
 const findAll = async (req, res) => {
   try {
-    const contracts = await Contract.findAll();
+    const contracts = await Contract.findAll({
+      include: [
+        {
+          model: Course,
+          attributes: ["id", "name"],
+        },
+        {
+          model: Student,
+          attributes: ["id", "fullName"],
+        },
+      ],
+    });
     res.status(200).send(contracts);
   } catch (error) {
     sendErrorResponse(error, res, 400);
@@ -49,7 +63,18 @@ const findAll = async (req, res) => {
 
 const findOne = async (req, res) => {
   try {
-    const contract = await Contract.findByPk(req.params.id);
+    const contract = await Contract.findByPk(req.params.id, {
+      include: [
+        {
+          model: Course,
+          attributes: ["id", "name"],
+        },
+        {
+          model: Student,
+          attributes: ["id", "fullName"],
+        },
+      ],
+    });
 
     if (!contract) {
       return res.status(404).send({ error: "Contract not found" });
@@ -115,10 +140,50 @@ const remove = async (req, res) => {
   }
 };
 
+const findByDate = async (req, res) => {
+  try {
+    const { start_date, end_date } = req.body;
+
+    if (!start_date || !end_date) {
+      return sendErrorResponse(
+        {
+          message: "start_date and end_date are required",
+        },
+        res,
+        400
+      );
+    }
+
+    const contracts = await Contract.findAll({
+      where: {
+        createdAt: {
+          [Op.between]: [new Date(start_date), new Date(end_date)],
+        },
+      },
+      include: [
+        {
+          model: Course,
+          attributes: ["name", "level", "language"],
+        },
+        {
+          model: Student,
+          attributes: ["full_name", "email"],
+        },
+      ],
+      attributes: ["name", "status", "total_price", "createdAt"],
+    });
+
+    res.status(200).send(contracts);
+  } catch (error) {
+    sendErrorResponse(error, res, 400);
+  }
+};
+
 module.exports = {
   create,
   findAll,
   findOne,
   update,
   remove,
+  findByDate,
 };

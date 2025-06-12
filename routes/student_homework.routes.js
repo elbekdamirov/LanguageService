@@ -5,13 +5,15 @@ const {
   update,
   remove,
 } = require("../controllers/student_homework.controller");
+const studentJwtGuard = require("../middleware/guards/student-jwt.guard");
+const studentSelfGuard = require("../middleware/guards/student-self.guard");
 
 const router = require("express").Router();
 
-router.post("/", create);
-router.get("/", findAll);
-router.get("/:id", findOne);
-router.patch("/:id", update);
-router.delete("/:id", remove);
+router.post("/", studentJwtGuard, studentSelfGuard, create);
+router.get("/", studentJwtGuard, findAll);
+router.get("/:id", studentJwtGuard, studentSelfGuard, findOne);
+router.patch("/:id", studentJwtGuard, studentSelfGuard, update);
+router.delete("/:id", studentJwtGuard, studentSelfGuard, remove);
 
 module.exports = router;

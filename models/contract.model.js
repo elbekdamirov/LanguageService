@@ -28,7 +28,7 @@ const Contract = sequelize.define(
       allowNull: false,
     },
     status: {
-      type: DataTypes.ENUM("ENDED", "ACTIVE", "PENDING"),
+      type: DataTypes.ENUM("ENDED", "ACTIVE", "PENDING", "CANCELLED"),
     },
   },
   {

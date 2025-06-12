@@ -32,9 +32,11 @@ exports.contractValidation = (body) => {
       "any.required": "Total price is required",
     }),
 
-    status: Joi.string().valid("ENDED", "ACTIVE", "PENDING").messages({
-      "any.only": "Status must be one of ENDED, ACTIVE, or PENDING",
-    }),
+    status: Joi.string()
+      .valid("ENDED", "ACTIVE", "PENDING", "CANCELLED")
+      .messages({
+        "any.only": "Status must be one of ENDED, ACTIVE, PENDING or CANCELLED",
+      }),
 
     courseId: Joi.number().integer().positive().required().messages({
       "number.base": "Course ID must be a number",
@@ -78,9 +80,11 @@ exports.updateContractValidation = (body) => {
       "number.precision": "Total price can have maximum 2 decimal places",
     }),
 
-    status: Joi.string().valid("ENDED", "ACTIVE", "PENDING").messages({
-      "any.only": "Status must be one of ENDED, ACTIVE, or PENDING",
-    }),
+    status: Joi.string()
+      .valid("ENDED", "ACTIVE", "PENDING", "CANCELLED")
+      .messages({
+        "any.only": "Status must be one of ENDED, ACTIVE, PENDING or CANCELLED",
+      }),
 
     courseId: Joi.number().integer().positive().messages({
       "number.base": "Course ID must be a number",
